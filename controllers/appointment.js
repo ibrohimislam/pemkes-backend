@@ -46,53 +46,43 @@ function patientAddress(address) {
 }
 
 router.put('/:id', async function(req, res) {
-  const appointment = req.body;
-  const patientParticipant = appointment.participant.find(it => it.actor.reference.split('/')[0] === "Patient");
-  const patientId = patientParticipant.actor.reference.split('/')[1];
-  const patientRequest = await fetch(`${process.env.FHIR_ENDPOINT}/Patient/${patientId}`)
-  const patient = await patientRequest.json();
-
-  console.log(JSON.stringify({
-    "identification_no": patient.identifier.find(it => it.system === "KTP")?.value,
-    "name": humanNameToString(patient.name[0]),
-    "gender": patientGenderMap(patient.gender),
-    "place_of_birth": "-",
-    "date_of_birth": patient.birthDate,
-    "mobile_phone": patientPhone(patient),
-    "email": patientEmail(patient),
-    "home_address": patient.address,
-    "rt": "001",
-    "rw": "001",
-    "tgl_registrasi": appointment.start.split('T')[0],
-    "api_token": process.env.RSUI_REGISTRATION_TOKEN
-  }));
-
-  const response = await fetch(process.env.RSUI_REGISTRATION_ENDPOINT, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      "identification_no": patient.identifier.find(it => it.system === "KTP")?.value,
-      "name": humanNameToString(patient.name[0]),
-      "gender": patientGenderMap(patient.gender),
-      "place_of_birth": "-",
-      "date_of_birth": patient.birthDate,
-      "mobile_phone": patientPhone(patient),
-      "email": patientEmail(patient),
-      "home_address": patientAddress(patient.address),
-      "rt": "001",
-      "rw": "001",
-      "tgl_registrasi": appointment.start.split('T')[0],
-      "api_token": process.env.RSUI_REGISTRATION_TOKEN
+  try {
+    const appointment = req.body;
+    const patientParticipant = appointment.participant.find(it => it.actor.reference.split('/')[0] === "Patient");
+    const patientId = patientParticipant.actor.reference.split('/')[1];
+    const patientRequest = await fetch(`${process.env.FHIR_ENDPOINT}/Patient/${patientId}`)
+    const patient = await patientRequest.json();
+  
+    const response = await fetch(process.env.RSUI_REGISTRATION_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        "identification_no": patient.identifier.find(it => it.system === "KTP")?.value,
+        "name": humanNameToString(patient.name[0]),
+        "gender": patientGenderMap(patient.gender),
+        "place_of_birth": "-",
+        "date_of_birth": patient.birthDate,
+        "mobile_phone": patientPhone(patient),
+        "email": patientEmail(patient),
+        "home_address": patientAddress(patient.address),
+        "rt": "001",
+        "rw": "001",
+        "tgl_registrasi": appointment.start.split('T')[0],
+        "api_token": process.env.RSUI_REGISTRATION_TOKEN
+      })
     })
-  })
-
-  console.log({ response: await response.text() });
-
-  if (response.ok) {
-    console.log(response.text());
-    return res.status(200)
+  
+    console.log({ response: await response.text() });
+  
+    if (response.ok) {
+      console.log(response.text());
+      return res.status(200)
+    }
+    return res.status(500)
+  } catch (e) {
+    console.error(e);
+    return res.status(400)
   }
-  return res.status(500)
 });
 
 module.exports = router;

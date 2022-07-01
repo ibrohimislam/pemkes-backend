@@ -166,46 +166,53 @@ function getAlamatDomisili(questionnaireResponse) {
 }
 
 router.put('/:id', async function(req, res) {
-  const questionnaireResponse = req.body;
-
-  const bundle = {
-    resourceType: 'Bundle',
-    type: 'transaction',
-    entry: [{
-      fullUrl: questionnaireResponse.subject.reference,
-      resource: {
-        resourceType: 'Binary',
-        contentType: 'application/json-patch+json',
-        content: btoa(
-          JSON.stringify([
-            ...getGenderFromQuestionaireResponse(questionnaireResponse),
-            ...getNim(questionnaireResponse),
-            ...getMaritalStatus(questionnaireResponse),
-            ...getEmailAddress(questionnaireResponse),
-            ...getBpjsNumber(questionnaireResponse),
-            ...getAlamatDomisili(questionnaireResponse),
-          ])
-        ),
-      },
-      request: {
-        url: questionnaireResponse.subject.reference,
-      }
-    }]
-  }
-  console.log(`${process.env.FHIR_ENDPOINT}`);
-  const response = await fetch(`${process.env.FHIR_ENDPOINT}`, { method: 'POST', headers: {'Content-Type': 'application/fhir+json'}, body: JSON.stringify(bundle)});
-  if (response.ok) {
+  try {
+    const questionnaireResponse = req.body;
+    const bundle = {
+      resourceType: 'Bundle',
+      type: 'transaction',
+      entry: [{
+        fullUrl: questionnaireResponse.subject.reference,
+        resource: {
+          resourceType: 'Binary',
+          contentType: 'application/json-patch+json',
+          content: btoa(
+            JSON.stringify([
+              ...getGenderFromQuestionaireResponse(questionnaireResponse),
+              ...getNim(questionnaireResponse),
+              ...getMaritalStatus(questionnaireResponse),
+              ...getEmailAddress(questionnaireResponse),
+              ...getBpjsNumber(questionnaireResponse),
+              ...getAlamatDomisili(questionnaireResponse),
+            ])
+          ),
+        },
+        request: {
+          url: questionnaireResponse.subject.reference,
+        }
+      }]
+    }
+    console.log(`${process.env.FHIR_ENDPOINT}`);
+    const response = await fetch(`${process.env.FHIR_ENDPOINT}`, { method: 'POST', headers: {'Content-Type': 'application/fhir+json'}, body: JSON.stringify(bundle)});
+    if (response.ok) {
+      console.log({ response: await response.text() })
+      return res.status(200).json({
+        status: 'success',
+        message: 'Successfully updated'
+      })
+    }
     console.log({ response: await response.text() })
-    return res.status(200).json({
-      status: 'success',
-      message: 'Successfully updated'
+    return res.status(500).json({
+      status: 'failed',
+      message: 'Failed to update'
+    })
+  } catch (e) {
+    console.error(e)
+    return res.status(400).json({
+      status: 'failed',
+      message: 'Failed to update'
     })
   }
-  console.log({ response: await response.text() })
-  return res.status(500).json({
-    status: 'failed',
-    message: 'Failed to update'
-  })
 });
 
 module.exports = router;
