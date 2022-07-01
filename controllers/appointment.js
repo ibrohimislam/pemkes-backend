@@ -76,6 +76,7 @@ router.put('/:id', async function(req, res) {
       console.log(response.text());
       return res.status(200)
     }
+    console.log(response.text());
     return res.status(500)
   } catch (e) {
     console.error(e);
