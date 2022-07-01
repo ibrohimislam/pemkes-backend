@@ -19,8 +19,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/subscribe/QuestionnaireResponse/', questionnaireResponseController);
-app.use('/subscribe/Appointment/', appointmentController);
+app.use('/subscription/QuestionnaireResponse/', questionnaireResponseController);
+app.use('/subscription/Appointment/', appointmentController);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
