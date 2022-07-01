@@ -71,9 +71,7 @@ router.put('/:id', async function(req, res) {
         "api_token": process.env.RSUI_REGISTRATION_TOKEN
       })
     })
-  
-    console.log({ response: await response.text() });
-  
+    
     if (response.ok) {
       console.log(response.text());
       return res.status(200)
