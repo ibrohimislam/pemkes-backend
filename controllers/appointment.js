@@ -75,8 +75,11 @@ router.put('/:id', async function(req, res) {
     if (response.ok) {
       return res.status(200).json(await response.json());
     }
-    console.log(await response.text());
-    return res.status(500).json(await response.json())
+    const responseJson = await response.json();
+    if (responseJson.message == "Identitas pribadi atau anggota telah terdaftar") {
+      return res.status(200).json(responseJson);
+    }
+    return res.status(400).json(responseJson);
   } catch (e) {
     console.error(e);
     return res.status(400).json({ error: e.message });
