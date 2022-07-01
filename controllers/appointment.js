@@ -73,14 +73,13 @@ router.put('/:id', async function(req, res) {
     })
     
     if (response.ok) {
-      console.log(await response.text());
-      return res.status(200)
+      return res.status(200).json(await response.json());
     }
     console.log(await response.text());
-    return res.status(500)
+    return res.status(500).json(await response.json())
   } catch (e) {
     console.error(e);
-    return res.status(400)
+    return res.status(400).json({ error: e.message });
   }
 });
 
