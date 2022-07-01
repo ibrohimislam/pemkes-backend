@@ -192,10 +192,8 @@ router.put('/:id', async function(req, res) {
         }
       }]
     }
-    console.log(`${process.env.FHIR_ENDPOINT}`);
     const response = await fetch(`${process.env.FHIR_ENDPOINT}`, { method: 'POST', headers: {'Content-Type': 'application/fhir+json'}, body: JSON.stringify(bundle)});
     if (response.ok) {
-      console.log({ response: await response.text() })
       return res.status(200).json({
         status: 'success',
         message: 'Successfully updated'
