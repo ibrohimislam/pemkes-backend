@@ -48,6 +48,9 @@ function patientAddress(address) {
 router.put('/:id', async function(req, res) {
   try {
     const appointment = req.body;
+    if (!appointment.extension.find((it)=>it.url=="https://ehealth.co.id/terminology/appointment-redirect-url")) {
+      return res.status(200).json({ status: 'skip' });
+    }
     const patientParticipant = appointment.participant.find(it => it.actor.reference.split('/')[0] === "Patient");
     const patientId = patientParticipant.actor.reference.split('/')[1];
     const patientRequest = await fetch(`${process.env.FHIR_ENDPOINT}/Patient/${patientId}`)
